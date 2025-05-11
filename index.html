@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion-Based Music Recommender</title>
+</head>
+<body>
+    <h1>Emotion-Based Music Recommendation</h1>
+    <form id="upload-form" method="POST" enctype="multipart/form-data" action="/detect_emotion">
+        <label for="input-type">Choose Input Type:</label>
+        <select name="input_type" id="input-type">
+            <option value="facial">Facial Emotion</option>
+            <option value="speech">Speech Emotion</option>
+            <option value="hybrid">Hybrid Emotion (Facial + Speech)</option>
+        </select>
+        <br><br>
+        <label for="facial-file">Upload Facial Image:</label>
+        <input type="file" name="file" id="facial-file" required>
+        <br><br>
+        <label for="speech-file">Upload Speech Audio:</label>
+        <input type="file" name="speech" id="speech-file">
+        <br><br>
+        <button type="submit">Submit</button>
+    </form>
+    <div id="results"></div>
+    <script>
+        document.getElementById('upload-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const response = await fetch('/detect_emotion', { method: 'POST', body: formData });
+            const data = await response.json();
+            if (data.error) {
+                alert(data.error);
+            } else {
+                document.getElementById('results').innerHTML = `
+                    <h2>Detected Emotion: ${data.emotion}</h2>
+                    <h3>Recommended Songs:</h3>
+                    <ul>
+                        ${data.songs.map(song => `<li><a href="${song.url}" target="_blank">${song.name} by ${song.artist}</a></li>`).join('')}
+                    </ul>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
